@@ -1,0 +1,75 @@
+# username on remote machine
+remoteUsername: ubuntu
+
+# IP of remote machine
+remoteIP: 192.168.1.2
+
+# remote location to rsync data INTO
+#  -path must be absolute
+remoteDestinationDir: /home/ubuntu/dirName/
+
+# local directories to copy to the remote machine
+#  -path must be absolute
+#  -be careful about trailing slashes...
+#    -slash:    copy contents of directory
+#    -no slash: copy directory
+localSourceDirs:
+  - /path/to/local/dir
+
+
+# options for SSH connection to remote machine
+sshOptions:
+
+  # local location of private key to ssh into the remote machine
+  privateKeyLoc: /path/to/private.key
+
+  # SSH port to use
+  sshPort: 22
+
+
+# options for rsync
+rsyncOptions:
+
+  # arguments for rsync command
+  arguments: -arvv --delete
+
+  # do we want to log the output of rsync
+  logOutput: false
+
+
+# options for working with a ZFS pool on the remote machine
+remoteZFSOptions:
+
+  # enable this feature
+  enable: true
+
+  # name of the ZFS pool
+  poolName: encStorage
+
+  # number of ZFS snapshots to maintain
+  snapshotLimit: 5
+
+  # import pool before backup
+  #  -useful if using automated LUKS options
+  importPool: true
+
+  # export pool after backup
+  #  -useful if using automated LUKS options
+  exportPool: true
+
+  # scrub the pool after backup completes
+  scrubAfterBackup: false
+
+
+# options for working with an encrypted LUKS container on the remote machine
+remoteLUKSOptions:
+
+  # enable this feature
+  enable: true
+
+  # remote location of LUKS container to open
+  containerLoc: /home/ubuntu/disk.img
+
+  # name of mounted LUKS container
+  mountName: encFileDisk
+

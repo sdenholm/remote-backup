@@ -97,7 +97,7 @@ class RemoteOperations:
     :return:
     """
     #return ["ssh", "-i", self.sshPrivateKey, f"{self.remoteUsername}@{self.remoteIP}", f"'{command}'"]
-    return ["ssh", "-p", self.sshPort, "-i", self.sshPrivateKey, f"{self.remoteUsername}@{self.remoteIP}", f"'{command}'"]
+    return ["ssh", "-p", str(self.sshPort), "-i", self.sshPrivateKey, f"{self.remoteUsername}@{self.remoteIP}", f"'{command}'"]
 
 
   def _remoteFileExists(self, fileLocation) -> bool:

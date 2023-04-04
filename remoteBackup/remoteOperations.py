@@ -156,19 +156,27 @@ class RemoteOperations:
     # Mount the LUKS container to the remote directory location
     :return:
     """
-
-    # location of the open LUKS container
-    #openDiskLoc = os.path.join("dev", "disk", "by-id", f"dm-name-{self.luksMountName}")
     
-    #remoteCmd = self._assembleRemoteCommandList(f"sudo mount {openDiskLoc} {self.remoteDestinationDir}")
-    #child = pexpect.spawn(" ".join(remoteCmd), timeout=60)
-
     # send the "mount LUKS container" command via SSH
     remoteCmd = self._assembleRemoteCommandList(f"sudo mount /dev/mapper/{self.luksMountName} {self.remoteDestinationDir}")
     RemoteOperations.runCommand(remoteCmd, basicCMD=False)
     
     # did we mount the container to this location
     return self.isMountedDirectory(self.remoteDestinationDir)
+  
+  
+  def unmountLUKSContainer(self) -> bool:
+    """
+    # Unmount the LUKS container
+    :return:
+    """
+  
+    # send the "unmount LUKS container" command via SSH
+    remoteCmd = self._assembleRemoteCommandList(f"sudo umount /dev/mapper/{self.luksMountName}")
+    RemoteOperations.runCommand(remoteCmd, basicCMD=False)
+  
+    # did we unmount the container at this location
+    return not self.isMountedDirectory(self.remoteDestinationDir)
     
 
   def closeLUKSContainer(self) -> bool:
@@ -460,7 +468,7 @@ class RemoteOperations:
     success = True
 
     remoteCmd = self._assembleRemoteCommandList("date")
-    print(remoteCmd)
+    #print(remoteCmd)
   
     # perform date command on remote machine
     dateNow = datetime.datetime.utcnow()

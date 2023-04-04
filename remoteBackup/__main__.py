@@ -294,6 +294,14 @@ def backup(**kwargs):
 
   # LUKS: close container
   if configData["remoteLUKSOptions"]["enable"]:
+    
+    # if we mounted the container, unmount it
+    if configData["remoteLUKSOptions"]["mountToRemoteDestinationDir"]:
+      containerUnmounted = remoteOps.unmountLUKSContainer()
+      logger.info(f"Unmount LUKS container:            {_convertBoolToStr(containerUnmounted)}")
+      if not containerUnmounted:
+        sys.exit(1)
+    
     containerClosed = remoteOps.closeLUKSContainer()
     logger.info(f"Close LUKS container:              {_convertBoolToStr(containerClosed)}")
     if not containerClosed:

@@ -47,12 +47,12 @@ Format the newly opened disk and import it:
 ```bash
 sudo zpool create -o ashift=12 -m /mnt/encStorage encStorage /dev/disk/by-id/dm-name-encFileDisk
 ```
+<br>
 
-__OTHER__: If wanting to just format it with ext4:
+__OPTIONAL__: If wanting to just format it with ext4:
 ```bash
 sudo mkfs -t ext4 /dev/disk/by-id/dm-name-encFileDisk
 ```
-<br>
 
 __OPTIONAL__: Schedule a zpool scrub on the 15th of every month at 04:00. In ```crontab -e```:
 ```bash
@@ -71,6 +71,15 @@ Import the newly opened disk:
 ```bash
 sudo zpool import encStorage
 ```
+
+<br>
+
+__OPTIONAL__: If wanting to mount the LUKS container ourselves (no ZFS):
+```bash
+sudo mount /dev/disk/by-id/dm-name-encFileDisk /mnt/encStorage
+```
+
+
 ___
 ### Close the file system
 

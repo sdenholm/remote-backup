@@ -408,6 +408,24 @@ class RemoteOperations:
     
     return True
     
+  @staticmethod
+  def _dateInString(date: datetime.datetime, strToCheck: str) -> bool:
+    """
+    # Is the date (roughly...) present in the strToCheck
+    #
+    :param date:
+    :param strToCheck:
+    :return:
+    """
+    
+    # %a: name of day
+    # %b: name of month
+    # %Y: name of year
+    for strParam in ["%a", "%b", "%Y"]:
+      if not date.strftime(strParam) in strToCheck:
+        return False
+    return True
+    
   
   def canConnectToRemoteMachine(self) -> bool:
     """
@@ -440,13 +458,21 @@ class RemoteOperations:
       
       # do we get the expected output
       #   -double-check if we fail...
-      if not (dateNow.strftime("%a %b") in cmdOutput["stdout"] and dateNow.strftime("%Y") in cmdOutput["stdout"]):
-        dateNow = datetime.datetime.utcnow()
+      if not RemoteOperations._dateInString(dateNow, cmdOutput["stdout"]):
+        dateNow   = datetime.datetime.utcnow()
         cmdOutput = RemoteOperations.runCommand(remoteCmd, basicCMD=False)
-        if not (dateNow.strftime("%a %b") in cmdOutput["stdout"] and dateNow.strftime("%Y") in cmdOutput["stdout"]):
+        if not RemoteOperations._dateInString(dateNow, cmdOutput["stdout"]):
           logger.error(
-            f"backup: could not connect to remote machine (date test failed):\n{cmdOutput['stdout']}\n{cmdOutput['stderr']}")
+            f"backup: could not connect to remote machine (date test failed):\n\nstdout:\n{cmdOutput['stdout']}\n\nstderr:\n{cmdOutput['stderr']}")
           success = False
+      
+      #if not (dateNow.strftime("%a %b") in cmdOutput["stdout"] and dateNow.strftime("%Y") in cmdOutput["stdout"]):
+      #  dateNow = datetime.datetime.utcnow()
+      #  cmdOutput = RemoteOperations.runCommand(remoteCmd, basicCMD=False)
+      #  if not (dateNow.strftime("%a %b") in cmdOutput["stdout"] and dateNow.strftime("%Y") in cmdOutput["stdout"]):
+      #    logger.error(
+      #      f"backup: could not connect to remote machine (date test failed):\n{cmdOutput['stdout']}\n{cmdOutput['stderr']}")
+      #    success = False
   
     return success
   

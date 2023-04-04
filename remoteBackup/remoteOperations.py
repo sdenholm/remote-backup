@@ -433,7 +433,11 @@ class RemoteOperations:
       success = False
   
     else:
-    
+      
+      print(dateNow.strftime("%a %b"))
+      print(dateNow.strftime("%Y"))
+      
+      
       # do we get the expected output
       #   -double-check if we fail...
       if not (dateNow.strftime("%a %b") in cmdOutput["stdout"] and dateNow.strftime("%Y") in cmdOutput["stdout"]):

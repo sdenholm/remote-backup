@@ -50,7 +50,7 @@ def parseConfigFile(fileLoc: str):
     "sshOptions":           ["privateKeyLoc", "sshPort"],
     "rsyncOptions":         ["arguments", "logOutput"],
     "remoteZFSOptions":     ["enable", "poolName", "snapshotLimit", "importPool", "exportPool", "scrubAfterBackup"],
-    "remoteLUKSOptions":    ["enable", "containerLoc", "mountName"]
+    "remoteLUKSOptions":    ["enable", "containerLoc", "mountName", "mountToRemoteDestinationDir"]
   }
 
 
@@ -207,12 +207,32 @@ def backup(**kwargs):
     logger.info(f"Remote LUKS container closed:      {_convertBoolToStr(containerClosed)}")
     if not containerClosed:
       sys.exit(1)
-  
+    
     # LUKS: open container
     containerOpen = remoteOps.openLUKSContainer()
     logger.info(f"Open LUKS container:               {_convertBoolToStr(containerOpen)}")
     if not containerOpen:
       sys.exit(1)
+    
+    # CHECK: if we're mounting the LUKS container:
+    if configData["remoteLUKSOptions"]["mountToRemoteDestinationDir"]:
+      
+      # CHECK: make sure ZFS isn't also being used, as it mounts the ZFS drive itself
+      if configData["remoteZFSOptions"]["enable"]:
+        logger.error("Invalid configuration: cannot mount LUKS container with ZFS enabled; ZFS does this itself")
+        sys.exit(1)
+        
+      # CHECK: remote directory is empty
+      if len(os.listdir(configData["remoteDestinationDir"])) != 0:
+        logger.error(f"Cannot mount LUKS container in non-empty directory: {configData['remoteDestinationDir']}")
+        sys.exit(1)
+      
+      # LUKS: mount container
+      containerMounted = remoteOps.mountLUKSContainer()
+      logger.info(f"Mount LUKS container:              {_convertBoolToStr(containerMounted)}")
+      if not containerMounted:
+        sys.exit(1)
+  
   
   # ZFS: import pool
   if configData["remoteZFSOptions"]["enable"] and configData["remoteZFSOptions"]["importPool"]:

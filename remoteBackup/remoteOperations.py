@@ -82,8 +82,9 @@ class RemoteOperations:
     self.rsyncLogOutput = self.configData["rsyncOptions"]["logOutput"]
     
     # LUKS
-    self.luksMountName    = self.configData["remoteLUKSOptions"]["mountName"]
-    self.luksContainerLoc = self.configData["remoteLUKSOptions"]["containerLoc"]
+    self.luksMountName                   = self.configData["remoteLUKSOptions"]["mountName"]
+    self.luksContainerLoc                = self.configData["remoteLUKSOptions"]["containerLoc"]
+    self.luksMountToRemoteDestinationDir = self.configData["remoteLUKSOptions"]["mountToRemoteDestinationDir"]
     
     # ZFS
     self.zfsPoolName = self.configData["remoteZFSOptions"]["poolName"]
@@ -149,6 +150,26 @@ class RemoteOperations:
     # check that the container is now open
     return self.isLUKSContainerOpen()
 
+  
+  def mountLUKSContainer(self) -> bool:
+    """
+    # Mount the LUKS container to the remote directory location
+    :return:
+    """
+
+    # location of the open LUKS container
+    #openDiskLoc = os.path.join("dev", "disk", "by-id", f"dm-name-{self.luksMountName}")
+    
+    #remoteCmd = self._assembleRemoteCommandList(f"sudo mount {openDiskLoc} {self.remoteDestinationDir}")
+    #child = pexpect.spawn(" ".join(remoteCmd), timeout=60)
+
+    # send the "mount LUKS container" command via SSH
+    remoteCmd = self._assembleRemoteCommandList(f"sudo mount /dev/mapper/{self.luksMountName} {self.remoteDestinationDir}")
+    RemoteOperations.runCommand(remoteCmd, basicCMD=False)
+    
+    # did we mount the container to this location
+    return self.isMountedDirectory(self.remoteDestinationDir)
+    
 
   def closeLUKSContainer(self) -> bool:
     """
@@ -452,10 +473,6 @@ class RemoteOperations:
   
     else:
       
-      print(dateNow.strftime("%a %b"))
-      print(dateNow.strftime("%Y"))
-      
-      
       # do we get the expected output
       #   -double-check if we fail...
       if not RemoteOperations._dateInString(dateNow, cmdOutput["stdout"]):
@@ -614,8 +631,24 @@ class RemoteOperations:
     RemoteOperations.runCommand(remoteCmd, basicCMD=False)
     return True
   
+  def isMountedDirectory(self, directoryLoc: str) -> bool:
+    """
+    # Has a disk been mounted to the directory location
+    :param directoryLoc:
+    :return:
+    """
+    
+    # get disk info for the directory
+    diskInfo = self.getDiskSpaceInfo(directoryToCheck=directoryLoc)
+    
+    # something has been mounted here if:
+    #   -there is SOMETHING here
+    #   -the origin of that directory is not /dev/root
+    return not (diskInfo is None or "/dev/root" in diskInfo.get("filesystem", ""))
+    
+    
   
-  def getDiskSpaceInfo(self):
+  def getDiskSpaceInfo(self, directoryToCheck=None):
     """
     # Return the result of 'df -h' on the remote directory
     :return:
@@ -626,8 +659,11 @@ class RemoteOperations:
     encStorage      145G  128K  145G   1% /mnt/encStorage
     """
     
+    if directoryToCheck is None:
+      directoryToCheck = self.remoteDestinationDir
+    
     # carry out 'df -h' command
-    remoteCmd = self._assembleRemoteCommandList(f"df -h {self.remoteDestinationDir}")
+    remoteCmd = self._assembleRemoteCommandList(f"df -h {directoryToCheck}")
     cmdOutput = RemoteOperations.runCommand(remoteCmd, basicCMD=False)
     
     # split result into lines
@@ -641,8 +677,9 @@ class RemoteOperations:
     else:
       diskInfo = [entry for entry in stdOutLines[1].split(" ") if entry != ""]
       return {
-        "total": diskInfo[1],
-        "used":  diskInfo[2]
+        "filesystem": diskInfo[0],
+        "total":      diskInfo[1],
+        "used":       diskInfo[2]
       }
     
     

@@ -194,6 +194,10 @@ remoteLUKSOptions:
 
   # name of mounted LUKS container
   mountName: encFileDisk
+
+  # should we mount the container to the remoteDestinationDir
+  #  -ZFS does this, so only use if LUKS = true and ZFS = false
+  mountToRemoteDestinationDir: false
 ```
 
 ___

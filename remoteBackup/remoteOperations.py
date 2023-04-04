@@ -421,6 +421,7 @@ class RemoteOperations:
     success = True
 
     remoteCmd = self._assembleRemoteCommandList("date")
+    print(remoteCmd)
   
     # perform date command on remote machine
     dateNow = datetime.datetime.utcnow()

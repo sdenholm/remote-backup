@@ -639,6 +639,29 @@ class RemoteOperations:
     RemoteOperations.runCommand(remoteCmd, basicCMD=False)
     return True
   
+  def isDirectoryEmpty(self, directoryLoc: str) -> bool:
+    """
+    # Is the given directory empty
+    :param directoryLoc:
+    :return:
+    """
+    
+    # carry out 'ls <directory>' command
+    remoteCmd = self._assembleRemoteCommandList(f"ls {directoryLoc}")
+    cmdOutput = RemoteOperations.runCommand(remoteCmd, basicCMD=False)
+    
+    print("====")
+    print(cmdOutput['stdout'])
+    print("====")
+    
+    #stdOutLines = cmdOutput['stdout'].split("\n")
+    
+    return len(cmdOutput['stdout']) == 0
+    
+    
+    
+    
+  
   def isMountedDirectory(self, directoryLoc: str) -> bool:
     """
     # Has a disk been mounted to the directory location

@@ -223,7 +223,7 @@ def backup(**kwargs):
         sys.exit(1)
         
       # CHECK: remote directory is empty
-      if len(os.listdir(configData["remoteDestinationDir"])) != 0:
+      if not remoteOps.isDirectoryEmpty(configData["remoteDestinationDir"]): #len(os.listdir(configData["remoteDestinationDir"])) != 0:
         logger.error(f"Cannot mount LUKS container in non-empty directory: {configData['remoteDestinationDir']}")
         sys.exit(1)
       

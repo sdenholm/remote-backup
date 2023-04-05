@@ -650,10 +650,6 @@ class RemoteOperations:
     remoteCmd = self._assembleRemoteCommandList(f"ls {directoryLoc}")
     cmdOutput = RemoteOperations.runCommand(remoteCmd, basicCMD=False)
     
-    print("====")
-    print(cmdOutput['stdout'])
-    print("====")
-    
     #stdOutLines = cmdOutput['stdout'].split("\n")
     
     return len(cmdOutput['stdout']) == 0

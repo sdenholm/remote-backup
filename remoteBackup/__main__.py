@@ -249,41 +249,52 @@ def backup(**kwargs):
   logger.info(f"Disk space before:                 {spaceInfo['used']}/{spaceInfo['total']}")
   
   
-  # perform rsync
-  logger.info("Starting rsync...")
-  logger.info("==================================================")
-  remoteOps.performRsync()
-  logger.info("==================================================")
-  
-  
-  # snapshot operations
-  if configData["remoteZFSOptions"]["enable"] and configData["remoteZFSOptions"]["snapshotLimit"] > 0:
+  # catch keyboard interrupt for
+  #  -rsync
+  #  -zfs operations
+  try:
     
-    # snapshot
-    logger.info("Creating ZFS snapshot")
-    remoteOps.zfsCreateSnapshot()
+    # perform rsync
+    logger.info("Starting rsync...")
+    logger.info("==================================================")
+    remoteOps.performRsync()
+    logger.info("==================================================")
     
-    # remove snapshots over limit
-    snapshotList = remoteOps.zfsGetSnapshots()
-    logger.info(f"Snapshot status:                   {len(snapshotList)}/{configData['remoteZFSOptions']['snapshotLimit']}")
-    for snapshotIndex in range(len(snapshotList) - configData["remoteZFSOptions"]["snapshotLimit"]):
-      logger.info(f"Destroying old ZFS snapshot:       {snapshotList[snapshotIndex]}")
-      remoteOps.zfsDestroySnapshot(snapshotList[snapshotIndex])
+    
+    # snapshot operations
+    if configData["remoteZFSOptions"]["enable"] and configData["remoteZFSOptions"]["snapshotLimit"] > 0:
+      
+      # snapshot
+      logger.info("Creating ZFS snapshot")
+      remoteOps.zfsCreateSnapshot()
+      
+      # remove snapshots over limit
+      snapshotList = remoteOps.zfsGetSnapshots()
+      logger.info(f"Snapshot status:                   {len(snapshotList)}/{configData['remoteZFSOptions']['snapshotLimit']}")
+      for snapshotIndex in range(len(snapshotList) - configData["remoteZFSOptions"]["snapshotLimit"]):
+        logger.info(f"Destroying old ZFS snapshot:       {snapshotList[snapshotIndex]}")
+        remoteOps.zfsDestroySnapshot(snapshotList[snapshotIndex])
 
-  # REPORT: amount of remote disk space
-  spaceInfo = remoteOps.getDiskSpaceInfo()
-  if spaceInfo is None:
-    logger.error("Could not get disk space information")
-    sys.exit(1)
-  logger.info(f"Disk space after:                  {spaceInfo['used']}/{spaceInfo['total']}")
-  
-  # ZFS: scrub pool
-  if configData["remoteZFSOptions"]["enable"] and configData["remoteZFSOptions"]["scrubAfterBackup"]:
-    logger.info("Scrubbing ZFS pool...")
-    scrubSuccessful = remoteOps.scrubZFSPool()
-    logger.info(f"ZFS pool scrub:                    {_convertBoolToStr(scrubSuccessful)}")
-    if not scrubSuccessful:
+    # REPORT: amount of remote disk space
+    spaceInfo = remoteOps.getDiskSpaceInfo()
+    if spaceInfo is None:
+      logger.error("Could not get disk space information")
       sys.exit(1)
+    logger.info(f"Disk space after:                  {spaceInfo['used']}/{spaceInfo['total']}")
+    
+    # ZFS: scrub pool
+    if configData["remoteZFSOptions"]["enable"] and configData["remoteZFSOptions"]["scrubAfterBackup"]:
+      logger.info("Scrubbing ZFS pool...")
+      scrubSuccessful = remoteOps.scrubZFSPool()
+      logger.info(f"ZFS pool scrub:                    {_convertBoolToStr(scrubSuccessful)}")
+      if not scrubSuccessful:
+        sys.exit(1)
+  
+  
+  # user aborted rsync or zfs operations
+  except KeyboardInterrupt as err:
+    logger.info(f"OPERATION ABORTED BY USER")
+  
   
   # ZFS: export pool
   if configData["remoteZFSOptions"]["enable"] and configData["remoteZFSOptions"]["exportPool"]:

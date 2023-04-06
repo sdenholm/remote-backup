@@ -293,7 +293,7 @@ def backup(**kwargs):
   
   
   # user aborted rsync or zfs operations
-  except KeyboardInterrupt as err:
+  except KeyboardInterrupt:
     logger.info(f"\n\nOPERATION ABORTED BY USER")
     logger.info(f"Waiting 10 seconds")
     time.sleep(10)

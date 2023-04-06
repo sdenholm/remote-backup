@@ -2,6 +2,7 @@ import argparse
 import logging
 import sys
 import os
+import time
 import yaml
 
 from remoteOperations import RemoteOperations
@@ -293,7 +294,9 @@ def backup(**kwargs):
   
   # user aborted rsync or zfs operations
   except KeyboardInterrupt as err:
-    logger.info(f"OPERATION ABORTED BY USER")
+    logger.info(f"\n\nOPERATION ABORTED BY USER")
+    logger.info(f"Waiting 10 seconds")
+    time.sleep(10)
   
   
   # ZFS: export pool

@@ -447,10 +447,13 @@ class RemoteOperations:
     :return:
     """
     
+    logger.debug(f"_dateInString: looking at: {strToCheck}")
+    
     # %a: name of day
     # %b: name of month
     # %Y: name of year
     for strParam in ["%a", "%b", "%Y"]:
+      logger.debug(f"_dateInString: looking for: {date.strftime(strParam)}")
       if not date.strftime(strParam) in strToCheck:
         return False
     return True

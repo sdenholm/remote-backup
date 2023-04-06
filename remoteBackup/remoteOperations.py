@@ -437,44 +437,19 @@ class RemoteOperations:
     
     return True
     
-  @staticmethod
-  def _dateInString(date: datetime.datetime, strToCheck: str) -> bool:
-    """
-    # Is the date (roughly...) present in the strToCheck
-    #
-    :param date:
-    :param strToCheck:
-    :return:
-    """
-    
-    logger.debug(f"_dateInString: looking at: {strToCheck}")
-    
-    # %a: name of day
-    # %b: name of month
-    # %Y: name of year
-    for strParam in ["%a", "%b", "%Y"]:
-      logger.debug(f"_dateInString: looking for: {date.strftime(strParam)}")
-      if not date.strftime(strParam) in strToCheck:
-        return False
-    return True
-    
   
   def canConnectToRemoteMachine(self) -> bool:
     """
     # CHECK: can connect to remote machine
-    #  -perform "date" command on remote machine and do a lazy match (day, year is the same)
-    #  -small chance that date will change, so do the check twice
+    #  -perform "ls /" command on remote machine and do a lazy match (bin, boot, dev)
     #
     :return:
     """
     
     success = True
-
-    remoteCmd = self._assembleRemoteCommandList("date")
-    #print(remoteCmd)
-  
-    # perform date command on remote machine
-    dateNow = datetime.datetime.utcnow()
+    
+    # perform command on remote machine
+    remoteCmd = self._assembleRemoteCommandList("ls /")
     cmdOutput = RemoteOperations.runCommand(remoteCmd, basicCMD=False)
   
     # any connection issues
@@ -485,22 +460,15 @@ class RemoteOperations:
     else:
       
       # do we get the expected output
-      #   -double-check if we fail...
-      if not RemoteOperations._dateInString(dateNow, cmdOutput["stdout"]):
-        dateNow   = datetime.datetime.utcnow()
-        cmdOutput = RemoteOperations.runCommand(remoteCmd, basicCMD=False)
-        if not RemoteOperations._dateInString(dateNow, cmdOutput["stdout"]):
-          logger.error(
-            f"backup: could not connect to remote machine (date test failed):\n\nstdout:\n{cmdOutput['stdout']}\n\nstderr:\n{cmdOutput['stderr']}")
+      logger.debug(f"canConnectToRemoteMachine: looking at: {cmdOutput['stdout']}")
+      for dirName in ["bin", "boot", "dev"]:
+        logger.debug(f"canConnectToRemoteMachine: looking for: {dirName}")
+        if not dirName in cmdOutput["stdout"]:
+          errMsg  = f"backup: could not connect to remote machine"
+          errMsg += f" (root directory test failed):\n\nstdout:\n"
+          errMsg += f"{cmdOutput['stdout']}\n\nstderr:\n{cmdOutput['stderr']}"
+          logger.error(errMsg)
           success = False
-      
-      #if not (dateNow.strftime("%a %b") in cmdOutput["stdout"] and dateNow.strftime("%Y") in cmdOutput["stdout"]):
-      #  dateNow = datetime.datetime.utcnow()
-      #  cmdOutput = RemoteOperations.runCommand(remoteCmd, basicCMD=False)
-      #  if not (dateNow.strftime("%a %b") in cmdOutput["stdout"] and dateNow.strftime("%Y") in cmdOutput["stdout"]):
-      #    logger.error(
-      #      f"backup: could not connect to remote machine (date test failed):\n{cmdOutput['stdout']}\n{cmdOutput['stderr']}")
-      #    success = False
   
     return success
   

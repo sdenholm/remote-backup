@@ -455,7 +455,7 @@ class RemoteOperations:
         arguments = self.rsyncArguments + f" --log-file='{logFilename}'"
 
       print(localSourceDir)
-      localSourceDir.replace(" ", "\\ ")
+      localSourceDir = localSourceDir.replace(" ", "\\ ")
       print(localSourceDir)
       
       logger.info(f"rsync local directory: {localSourceDir}")

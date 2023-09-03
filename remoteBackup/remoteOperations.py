@@ -270,15 +270,15 @@ class RemoteOperations:
     self.configData = configData
   
     # remote machine info
-    self.remoteUsername = self.configData["remoteUsername"]
-    self.remoteIP = self.configData['remoteIP']
+    self.remoteUsername       = self.configData["remoteUsername"]
+    self.remoteIP             = self.configData['remoteIP']
     self.remoteDestinationDir = self.configData['remoteDestinationDir']
   
     # local machine info
     self.localSourceDirectories = self.configData['localSourceDirs']
   
     # SSH
-    self.sshPort = self.configData["sshOptions"]["sshPort"]
+    self.sshPort       = self.configData["sshOptions"]["sshPort"]
     self.sshPrivateKey = self.configData["sshOptions"]["privateKeyLoc"]
   
     # rsync
@@ -286,8 +286,8 @@ class RemoteOperations:
     self.rsyncLogOutput = self.configData["rsyncOptions"]["logOutput"]
   
     # LUKS
-    self.luksMountName = self.configData["remoteLUKSOptions"]["mountName"]
-    self.luksContainerLoc = self.configData["remoteLUKSOptions"]["containerLoc"]
+    self.luksMountName                   = self.configData["remoteLUKSOptions"]["mountName"]
+    self.luksContainerLoc                = self.configData["remoteLUKSOptions"]["containerLoc"]
     self.luksMountToRemoteDestinationDir = self.configData["remoteLUKSOptions"]["mountToRemoteDestinationDir"]
   
     # ZFS
@@ -453,7 +453,11 @@ class RemoteOperations:
         currentDT = datetime.datetime.utcnow().strftime("%Y-%m-%d--%H-%M-%S")
         logFilename = "rsync-log--" + currentDT + "--" + localSourceDir.replace(os.path.sep, ".")
         arguments = self.rsyncArguments + f" --log-file='{logFilename}'"
-    
+
+      print(localSourceDir)
+      localSourceDir.replace(" ", "\\ ")
+      print(localSourceDir)
+      
       logger.info(f"rsync local directory: {localSourceDir}")
       rsyncCmd = ["rsync", arguments, "-e",
                   f'"{sshStr}"',

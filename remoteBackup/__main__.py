@@ -146,6 +146,7 @@ def backup(**kwargs):
 
   # CHECK: local directories exist
   for i, dirLoc in enumerate(configData["localSourceDirs"]):
+    print(dirLoc)
     localDirExists = os.path.exists(dirLoc) and os.path.isdir(dirLoc)
     logger.info(f"Local directory [{str(i+1).zfill(3)}] exists:      {_convertBoolToStr(localDirExists)}")
     if not localDirExists:

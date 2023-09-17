@@ -454,8 +454,10 @@ class RemoteOperations:
         logFilename = "rsync-log--" + currentDT + "--" + localSourceDir.replace(os.path.sep, ".")
         arguments = self.rsyncArguments + f" --log-file='{logFilename}'"
 
-      # escape any spaces in the directory name
-      localSourceDir = localSourceDir.replace(" ", "\\ ")
+      # escape any invalid characters in the directory name
+      invalidChars = [" ", "(", ")"]
+      for invalidChar in invalidChars:
+        localSourceDir = localSourceDir.replace(invalidChar, "\\ ")
       
       logger.info(f"rsync local directory: {localSourceDir}")
       rsyncCmd = ["rsync", arguments, "-e",

@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 class RemoteOperations:
   
+  CHARS_TO_ESCAPE = [" ", "(", ")"]
+  
   @staticmethod
   def runCommand(cmdList: list, basicCMD=True, useShell=None, outputToStdout=False) -> dict:
     """
@@ -273,6 +275,9 @@ class RemoteOperations:
     self.remoteUsername       = self.configData["remoteUsername"]
     self.remoteIP             = self.configData['remoteIP']
     self.remoteDestinationDir = self.configData['remoteDestinationDir']
+    
+    for invalidChar in RemoteOperations.CHARS_TO_ESCAPE:
+      self.remoteDestinationDir = self.remoteDestinationDir.replace(invalidChar, "\\" + invalidChar)
   
     # local machine info
     self.localSourceDirectories = self.configData['localSourceDirs']
@@ -455,8 +460,8 @@ class RemoteOperations:
         arguments = self.rsyncArguments + f" --log-file='{logFilename}'"
 
       # escape any invalid characters in the directory name
-      invalidChars = [" ", "(", ")"]
-      for invalidChar in invalidChars:
+      #invalidChars = [" ", "(", ")"]
+      for invalidChar in RemoteOperations.CHARS_TO_ESCAPE:
         localSourceDir = localSourceDir.replace(invalidChar, "\\"+invalidChar)
       
       logger.info(f"rsync local directory: {localSourceDir}")

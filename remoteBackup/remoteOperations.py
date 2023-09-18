@@ -388,7 +388,6 @@ class RemoteOperations:
     # The remote directory exists
     :return:
     """
-    print(self.remoteDestinationDir)
     return self._remoteFileExists(self.remoteDestinationDir)
   
   
